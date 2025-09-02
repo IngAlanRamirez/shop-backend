@@ -31,6 +31,6 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['Active', 'Inactive', 'On Sale', 'Bouncing', 'Pending'])
+  @IsIn(['Active', 'Inactive'])
   status?: string;
 }
