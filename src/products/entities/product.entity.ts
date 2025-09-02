@@ -9,14 +9,23 @@ export class Product {
   @Column()
   name: string;
 
+  @Column({ unique: true })
+  sku: string;
+
   @Column('text', { nullable: true })
   description: string;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 12, scale: 2 })
   price: number;
 
-  @Column()
+  @Column({ type: 'int', default: 0 })
   stock_quantity: number;
+
+  @Column({ nullable: true })
+  type: string;
+
+  @Column({ nullable: true })
+  status: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

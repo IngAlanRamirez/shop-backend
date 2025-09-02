@@ -1,10 +1,11 @@
 import {
   IsString,
   IsNotEmpty,
-  IsDecimal,
-  IsPositive,
+  IsNumber,
   IsOptional,
+  IsIn,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
   @IsString()
@@ -12,13 +13,32 @@ export class CreateProductDto {
   name: string;
 
   @IsString()
+  @IsNotEmpty()
+  sku: string;
+
+  @IsString()
   @IsOptional()
   description?: string;
 
-  @IsDecimal()
-  @IsPositive()
+  @Type(() => Number)
+  @IsNumber()
   price: number;
 
-  @IsPositive()
-  stock_quantity: number;
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  stock_quantity?: number;
+
+  @IsOptional()
+  @IsString()
+  stock?: string;
+
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['Active', 'Inactive', 'On Sale', 'Bouncing', 'Pending'])
+  status?: string;
 }

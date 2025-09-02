@@ -3,7 +3,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { Repository, DeepPartial } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
@@ -14,7 +14,21 @@ export class ProductsService {
 
   // Create a new product
   create(createProductDto: CreateProductDto) {
-    const product = this.productsRepository.create(createProductDto);
+    const dto: Partial<CreateProductDto> & Record<string, any> = {
+      ...createProductDto,
+    };
+
+    if ('stock' in dto && !('stock_quantity' in dto)) {
+      const raw = String(dto.stock || '');
+      const m = raw.match(/(\d+)/);
+      if (m) dto.stock_quantity = parseInt(m[1], 10);
+    }
+
+    if (!dto.sku) {
+      dto.sku = `SKU-${Date.now().toString().slice(-6)}`;
+    }
+
+    const product = this.productsRepository.create(dto as DeepPartial<Product>);
     return this.productsRepository.save(product);
   }
 
