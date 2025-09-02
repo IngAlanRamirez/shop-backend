@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Sale } from './entities/sale.entity';
 
 @Injectable()
 export class SalesService {
+  constructor(
+    @InjectRepository(Sale)
+    private salesRepository: Repository<Sale>,
+  ) {}
+
+  // Create Sale
   create(createSaleDto: CreateSaleDto) {
-    return 'This action adds a new sale';
+    const sale = this.salesRepository.create(createSaleDto);
+    return this.salesRepository.save(sale);
   }
 
+  // Get All Sales
   findAll() {
-    return `This action returns all sales`;
+    return this.salesRepository.find();
   }
 
+  // Get Sale by ID
   findOne(id: number) {
-    return `This action returns a #${id} sale`;
+    return this.salesRepository.findOne({ where: { id } });
   }
 
+  // Update Sale
   update(id: number, updateSaleDto: UpdateSaleDto) {
-    return `This action updates a #${id} sale`;
+    return this.salesRepository.update(id, updateSaleDto as Partial<Sale>);
   }
 
+  // Remove Sale
   remove(id: number) {
-    return `This action removes a #${id} sale`;
+    return this.salesRepository.delete(id);
   }
 }

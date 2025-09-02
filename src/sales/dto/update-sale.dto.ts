@@ -1,4 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateSaleDto } from './create-sale.dto';
+import { IsArray, IsOptional } from 'class-validator';
 
-export class UpdateSaleDto extends PartialType(CreateSaleDto) {}
+export class UpdateSaleDto {
+  @IsArray()
+  @IsOptional()
+  items?: { productId: number; quantity: number }[];
+}
