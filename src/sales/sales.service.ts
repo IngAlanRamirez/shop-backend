@@ -102,7 +102,7 @@ export class SalesService {
     });
     return sales.flatMap((sale) =>
       sale.products.map((product) => ({
-        product,
+        ...product,
         user: sale.user.name,
       })),
     );
