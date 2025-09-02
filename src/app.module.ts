@@ -7,17 +7,18 @@ import { ProductsModule } from './products/products.module';
 import { SalesModule } from './sales/sales.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { AuthModule } from './auth/auth.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: 'localhost', // O la dirección IP de tu servidor de base de datos
       port: 5432,
-      username: 'admin',
-      password: 'Xbqb719>qW',
-      database: 'shopdb',
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      // username: 'admin', // Usa el nuevo nombre de usuario aquí
+      // password: 'Xbqb719>qW', // Usa la contraseña que has configurado
+      database: 'postgres', // Asegúrate de que este sea el nombre correcto de tu base de datos
+      entities: [User],
       synchronize: true,
     }),
     UsersModule,
