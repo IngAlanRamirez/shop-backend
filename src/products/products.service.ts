@@ -18,10 +18,14 @@ export class ProductsService {
       ...createProductDto,
     };
 
-    if ('stock' in dto && !('stock_quantity' in dto)) {
-      const raw = String(dto.stock || '');
+    if (
+      dto.stock &&
+      (dto.stock_quantity === undefined || dto.stock_quantity === null)
+    ) {
+      const raw = String(dto.stock).trim();
       const m = raw.match(/(\d+)/);
       if (m) dto.stock_quantity = parseInt(m[1], 10);
+      delete dto.stock;
     }
 
     if (!dto.sku) {
