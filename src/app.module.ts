@@ -8,6 +8,7 @@ import { SalesModule } from './sales/sales.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './users/entities/user.entity';
+import { Product } from './products/entities/product.entity';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { User } from './users/entities/user.entity';
       // username: 'admin', // Usa el nuevo nombre de usuario aquí
       // password: 'Xbqb719>qW', // Usa la contraseña que has configurado
       database: 'postgres', // Asegúrate de que este sea el nombre correcto de tu base de datos
-      entities: [User],
+      entities: [User, Product],
       synchronize: true,
     }),
     UsersModule,
