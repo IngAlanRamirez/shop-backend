@@ -15,11 +15,9 @@ import { Sale } from './sales/entities/sale.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost', // O la dirección IP de tu servidor de base de datos
+      host: 'localhost',
       port: 5432,
-      // username: 'admin', // Usa el nuevo nombre de usuario aquí
-      // password: 'Xbqb719>qW', // Usa la contraseña que has configurado
-      database: 'postgres', // Asegúrate de que este sea el nombre correcto de tu base de datos
+      database: 'postgres',
       entities: [User, Product, Sale],
       synchronize: true,
     }),

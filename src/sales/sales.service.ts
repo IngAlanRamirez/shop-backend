@@ -16,10 +16,6 @@ export class SalesService {
   constructor(
     @InjectRepository(Sale)
     private salesRepository: Repository<Sale>,
-    @InjectRepository(Product)
-    private productRepository: Repository<Product>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
   ) {}
 
   // Create Sale
