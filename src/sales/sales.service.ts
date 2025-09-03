@@ -30,7 +30,7 @@ export class SalesService {
       date?: string | Date;
     };
 
-    // Use transaction so stock updates and sale creation are atomic
+    // Usar transacción para que las actualizaciones de stock y la creación de la venta
     return await this.salesRepository.manager.transaction(async (manager) => {
       const prodRepo = manager.getRepository(Product);
       const userRepo = manager.getRepository(User);
@@ -42,7 +42,7 @@ export class SalesService {
         throw new NotFoundException(`User with id ${userId} not found`);
       }
 
-      // Load products, validate stock, compute total and update stock
+      // Cargar productos, validar stock, calcular total y actualizar stock
       const productEntities: Product[] = [];
       let total = 0;
 
@@ -91,7 +91,7 @@ export class SalesService {
     return this.salesRepository.find();
   }
 
-  // List of all products sold and the name of the user who sold them
+  // Lista de todos los productos vendidos y el nombre del usuario que los vendió
   async findAllProductsSold() {
     const sales = await this.salesRepository.find({
       relations: ['products', 'user'],
