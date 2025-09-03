@@ -14,7 +14,7 @@ export class Sale {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // Relacion con el usuario N:1
+  // Relación con el usuario N:1
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;

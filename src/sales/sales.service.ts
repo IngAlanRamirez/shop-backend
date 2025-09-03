@@ -23,7 +23,7 @@ export class SalesService {
     private saleDetailRepository: Repository<SaleDetail>,
   ) {}
 
-  // Create Sale
+  // Crear Venta
   async create(createSaleDto: CreateSaleDto): Promise<SaleResponseDto> {
     const { products, userId, date } = createSaleDto;
 
@@ -37,7 +37,7 @@ export class SalesService {
       // Cargar usuario dentro de la transacción
       const user = await userRepo.findOne({ where: { id: userId } });
       if (!user) {
-        throw new NotFoundException(`User with id ${userId} not found`);
+        throw new NotFoundException(`Usuario con id ${userId} no encontrado`);
       }
 
       // Cargar productos, validar stock, calcular total y actualizar stock
@@ -48,7 +48,7 @@ export class SalesService {
         const prod = await prodRepo.findOne({ where: { id: p.productId } });
         if (!prod) {
           throw new NotFoundException(
-            `Product with id ${p.productId} not found`,
+            `Producto con id ${p.productId} no encontrado`,
           );
         }
 
@@ -56,12 +56,12 @@ export class SalesService {
         const available = Number(prod.stock_quantity ?? 0);
         if (qty <= 0) {
           throw new BadRequestException(
-            `Invalid quantity for product ${p.productId}`,
+            `Cantidad inválida para el producto ${p.productId}`,
           );
         }
         if (available < qty) {
           throw new BadRequestException(
-            `Insufficient stock for product ${p.productId}`,
+            `Stock insuficiente para el producto ${p.productId}`,
           );
         }
 
@@ -104,7 +104,7 @@ export class SalesService {
     });
   }
 
-  // Get All Sales with details
+  // Obtener Todas las Ventas con detalles
   async findAll(): Promise<SaleResponseDto[]> {
     const sales = await this.salesRepository.find({
       relations: ['user', 'saleDetails', 'saleDetails.product'],
@@ -115,7 +115,7 @@ export class SalesService {
     );
   }
 
-  // Get Sale by ID with details
+  // Obtener Venta por ID con detalles
   async findOne(id: number): Promise<SaleResponseDto> {
     const sale = await this.salesRepository.findOne({
       where: { id },
@@ -123,7 +123,7 @@ export class SalesService {
     });
 
     if (!sale) {
-      throw new NotFoundException(`Sale with id ${id} not found`);
+      throw new NotFoundException(`Venta con id ${id} no encontrada`);
     }
 
     return this.mapToSaleResponse(sale, sale.user, sale.saleDetails);
@@ -148,17 +148,17 @@ export class SalesService {
     }));
   }
 
-  // Update Sale
+  // Actualizar Venta
   update(id: number, updateSaleDto: UpdateSaleDto) {
     return this.salesRepository.update(id, updateSaleDto as Partial<Sale>);
   }
 
-  // Remove Sale
+  // Eliminar Venta
   remove(id: number) {
     return this.salesRepository.delete(id);
   }
 
-  // Helper method to map entities to response DTOs
+  // Método auxiliar para mapear entidades a DTOs de respuesta
   private mapToSaleResponse(
     sale: Sale,
     user: User,

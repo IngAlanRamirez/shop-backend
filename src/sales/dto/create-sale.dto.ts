@@ -5,7 +5,7 @@ export class CreateSaleDto {
   @IsNotEmpty()
   products: { productId: number; quantity: number }[];
 
-  // Vendedor que hizo la venta
+  // Vendedor que realizó la venta
   @IsNotEmpty()
   userId: number;
 
