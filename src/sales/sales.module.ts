@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { SalesController } from './sales.controller';
 import { Sale } from './entities/sale.entity';
+import { SaleDetail } from './entities/sale-detail.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +10,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
   controllers: [SalesController],
   providers: [SalesService],
-  imports: [TypeOrmModule.forFeature([Sale, Product, User])],
+  imports: [TypeOrmModule.forFeature([Sale, SaleDetail, Product, User])],
 })
 export class SalesModule {}

@@ -1,12 +1,12 @@
-import { Product } from 'src/products/entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
+import { SaleDetail } from './sale-detail.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  JoinTable,
-  ManyToMany,
+  OneToMany,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
@@ -15,13 +15,15 @@ export class Sale {
   id: number;
 
   // Relacion con el usuario N:1
-  @ManyToOne(() => User, (user) => user.sales)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  // Relacion con los productos N:M
-  @ManyToMany(() => Product, (product) => product.sales)
-  @JoinTable()
-  products: Product[];
+  // Relación con los detalles de venta 1:N
+  @OneToMany(() => SaleDetail, (saleDetail) => saleDetail.sale, {
+    cascade: true,
+  })
+  saleDetails: SaleDetail[];
 
   @Column('decimal')
   total: number;

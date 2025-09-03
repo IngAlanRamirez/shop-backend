@@ -11,28 +11,37 @@ import {
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { SaleResponseDto } from './dto/sale-response.dto';
+import { ProductSoldResponseDto } from './dto/products-sold-response.dto';
 
 @Controller('sales')
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
   @Post()
-  create(@Body() createSaleDto: CreateSaleDto) {
+  create(@Body() createSaleDto: CreateSaleDto): Promise<SaleResponseDto> {
     return this.salesService.create(createSaleDto);
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<SaleResponseDto[]> {
     return this.salesService.findAll();
   }
 
   @Get('products-sold')
-  findAllProductsSold() {
+  findAllProductsSold(): Promise<ProductSoldResponseDto[]> {
     return this.salesService.findAllProductsSold();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<SaleResponseDto> {
+    return this.salesService.findOne(id);
+  }
+
+  @Get(':id/details')
+  findOneWithDetails(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<SaleResponseDto> {
     return this.salesService.findOne(id);
   }
 

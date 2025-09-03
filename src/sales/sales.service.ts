@@ -5,9 +5,12 @@ import {
 } from '@nestjs/common';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { SaleResponseDto } from './dto/sale-response.dto';
+import { ProductSoldResponseDto } from './dto/products-sold-response.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Sale } from './entities/sale.entity';
+import { SaleDetail } from './entities/sale-detail.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
 
@@ -16,34 +19,29 @@ export class SalesService {
   constructor(
     @InjectRepository(Sale)
     private salesRepository: Repository<Sale>,
+    @InjectRepository(SaleDetail)
+    private saleDetailRepository: Repository<SaleDetail>,
   ) {}
 
   // Create Sale
-  async create(createSaleDto: CreateSaleDto) {
-    const {
-      products = [],
-      userId,
-      date,
-    } = createSaleDto as {
-      products?: { productId: number; quantity: number }[];
-      userId: number;
-      date?: string | Date;
-    };
+  async create(createSaleDto: CreateSaleDto): Promise<SaleResponseDto> {
+    const { products, userId, date } = createSaleDto;
 
     // Usar transacción para que las actualizaciones de stock y la creación de la venta
     return await this.salesRepository.manager.transaction(async (manager) => {
       const prodRepo = manager.getRepository(Product);
       const userRepo = manager.getRepository(User);
       const saleRepo = manager.getRepository(Sale);
+      const saleDetailRepo = manager.getRepository(SaleDetail);
 
-      // Load user inside transaction
+      // Cargar usuario dentro de la transacción
       const user = await userRepo.findOne({ where: { id: userId } });
       if (!user) {
         throw new NotFoundException(`User with id ${userId} not found`);
       }
 
       // Cargar productos, validar stock, calcular total y actualizar stock
-      const productEntities: Product[] = [];
+      const saleDetails: SaleDetail[] = [];
       let total = 0;
 
       for (const p of products) {
@@ -67,46 +65,87 @@ export class SalesService {
           );
         }
 
+        // Actualizar stock
         prod.stock_quantity = available - qty;
         await prodRepo.save(prod);
 
-        productEntities.push(prod);
+        // Calcular subtotal
         const price = Number(prod.price ?? 0);
-        total += price * qty;
+        const subtotal = price * qty;
+        total += subtotal;
+
+        // Crear detalle de venta
+        const saleDetail = saleDetailRepo.create({
+          product: prod,
+          quantity: qty,
+          unitPrice: price,
+          subtotal: subtotal,
+        });
+        saleDetails.push(saleDetail);
       }
 
+      // Crear la venta
       const sale = saleRepo.create({
         user,
-        products: productEntities,
         total,
-        date: date ? new Date(date as string) : undefined,
+        date: date ? new Date(date) : undefined,
       } as Partial<Sale>);
 
-      return saleRepo.save(sale);
+      const savedSale = await saleRepo.save(sale);
+
+      // Asignar la venta a los detalles y guardarlos
+      for (const detail of saleDetails) {
+        detail.sale = savedSale;
+        await saleDetailRepo.save(detail);
+      }
+
+      // Retornar la venta con detalles
+      return this.mapToSaleResponse(savedSale, user, saleDetails);
     });
   }
 
-  // Get All Sales
-  findAll() {
-    return this.salesRepository.find();
-  }
-
-  // Lista de todos los productos vendidos y el nombre del usuario que los vendió
-  async findAllProductsSold() {
+  // Get All Sales with details
+  async findAll(): Promise<SaleResponseDto[]> {
     const sales = await this.salesRepository.find({
-      relations: ['products', 'user'],
+      relations: ['user', 'saleDetails', 'saleDetails.product'],
     });
-    return sales.flatMap((sale) =>
-      sale.products.map((product) => ({
-        ...product,
-        user: sale.user.name,
-      })),
+
+    return sales.map((sale) =>
+      this.mapToSaleResponse(sale, sale.user, sale.saleDetails),
     );
   }
 
-  // Get Sale by ID
-  findOne(id: number) {
-    return this.salesRepository.findOne({ where: { id } });
+  // Get Sale by ID with details
+  async findOne(id: number): Promise<SaleResponseDto> {
+    const sale = await this.salesRepository.findOne({
+      where: { id },
+      relations: ['user', 'saleDetails', 'saleDetails.product'],
+    });
+
+    if (!sale) {
+      throw new NotFoundException(`Sale with id ${id} not found`);
+    }
+
+    return this.mapToSaleResponse(sale, sale.user, sale.saleDetails);
+  }
+
+  // Lista de todos los productos vendidos y el nombre del usuario que los vendió
+  async findAllProductsSold(): Promise<ProductSoldResponseDto[]> {
+    const saleDetails = await this.saleDetailRepository.find({
+      relations: ['sale', 'sale.user', 'product'],
+    });
+
+    return saleDetails.map((detail) => ({
+      productId: detail.product.id,
+      productName: detail.product.name,
+      quantity: detail.quantity,
+      unitPrice: detail.unitPrice,
+      subtotal: detail.subtotal,
+      saleId: detail.sale.id,
+      userId: detail.sale.user.id,
+      sellerName: detail.sale.user.name,
+      saleDate: detail.sale.date,
+    }));
   }
 
   // Update Sale
@@ -117,5 +156,28 @@ export class SalesService {
   // Remove Sale
   remove(id: number) {
     return this.salesRepository.delete(id);
+  }
+
+  // Helper method to map entities to response DTOs
+  private mapToSaleResponse(
+    sale: Sale,
+    user: User,
+    saleDetails: SaleDetail[],
+  ): SaleResponseDto {
+    return {
+      id: sale.id,
+      userId: user.id,
+      userName: user.name,
+      total: sale.total,
+      date: sale.date,
+      saleDetails: saleDetails.map((detail) => ({
+        id: detail.id,
+        productId: detail.product.id,
+        productName: detail.product.name,
+        quantity: detail.quantity,
+        unitPrice: detail.unitPrice,
+        subtotal: detail.subtotal,
+      })),
+    };
   }
 }

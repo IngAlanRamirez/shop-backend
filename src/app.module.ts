@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './users/entities/user.entity';
 import { Product } from './products/entities/product.entity';
 import { Sale } from './sales/entities/sale.entity';
+import { SaleDetail } from './sales/entities/sale-detail.entity';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { Sale } from './sales/entities/sale.entity';
       host: 'localhost',
       port: 5432,
       database: 'postgres',
-      entities: [User, Product, Sale],
+      entities: [User, Product, Sale, SaleDetail],
       synchronize: true,
     }),
     UsersModule,

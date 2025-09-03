@@ -1,5 +1,4 @@
-import { Sale } from 'src/sales/entities/sale.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Product {
@@ -26,7 +25,4 @@ export class Product {
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
-
-  @ManyToMany(() => Sale, (sale) => sale.products)
-  sales: Sale[];
 }
